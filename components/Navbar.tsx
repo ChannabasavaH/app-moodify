@@ -1,33 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
+import {useNavigation} from '@react-navigation/native';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Moodify</Text>
-      
-      <TouchableOpacity 
-        style={styles.menuButton} 
-        onPress={() => setMenuOpen(!menuOpen)}
-      >
-        <Icon name='bars' color='#fff' size={30} />
+      <TouchableOpacity
+            onPress={() => navigation.navigate('Home')}>
+            <Text style={styles.text}>Moodify</Text>
+          </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => setMenuOpen(!menuOpen)}>
+        <Icon name="bars" color="#fff" size={30} />
       </TouchableOpacity>
 
       {menuOpen && (
         <View style={styles.dropdown}>
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => console.log('Navigate to Sign Up')}
-          >
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.menuText}>Sign Up</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => console.log('Navigate to Login')}
-          >
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('Login')}>
             <Text style={styles.menuText}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -45,7 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     position: 'relative',
-    zIndex:100,
+    zIndex: 100,
   },
   text: {
     color: '#fff',
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: 120,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
