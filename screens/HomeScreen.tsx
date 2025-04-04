@@ -4,11 +4,13 @@ import Footer from '../components/Footer';
 import Moodify from '../components/Moodify';
 import Welcome from '../components/Welcome';
 import ReadyToTuneIn from '../components/ReadyToTuneIn';
+import Navbar from '../components/Navbar';
 
 const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        <Navbar />
         <ScrollView contentContainerStyle={styles.scrollView}>
           <Moodify />
           <Welcome />

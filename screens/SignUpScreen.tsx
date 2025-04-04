@@ -13,6 +13,7 @@ import axios from 'axios/index';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useNavigation} from '@react-navigation/native';
+import Navbar from '../components/Navbar';
 
 const signUpSchema = Yup.object().shape({
   username: Yup.string()
@@ -45,7 +46,7 @@ const SignUpScreen = () => {
           values,
           {withCredentials: true},
         );
-        navigation.navigate("Login");
+        navigation.navigate('Login');
         Alert.alert('Success', 'Sign-up successful!');
       } catch (error: any) {
         console.error(
@@ -60,6 +61,7 @@ const SignUpScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Navbar />
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.title}>Sign Up</Text>

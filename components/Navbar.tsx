@@ -1,18 +1,24 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
 import {useNavigation} from '@react-navigation/native';
+import { AuthContext } from '../context/authContext';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const { logout, token } = useContext(AuthContext)
+
+  const handleLogout = async () => {
+    await logout();
+    navigation.navigate('Login');
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-            onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.text}>Moodify</Text>
-          </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.text}>Moodify</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.menuButton}
@@ -22,16 +28,24 @@ const Navbar = () => {
 
       {menuOpen && (
         <View style={styles.dropdown}>
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('SignUp')}>
-            <Text style={styles.menuText}>Sign Up</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.menuText}>Login</Text>
-          </TouchableOpacity>
+          {!token ? (
+            <>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.menuText}>Sign Up</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.menuText}>Login</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Text style={styles.menuText}>Logout</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
