@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
+import { AuthContext } from '../context/authContext';
+import { useNavigation } from '@react-navigation/native';
 
 const ReadyToTuneIn = () => {
 
+  const { token } = useContext(AuthContext);
+  const navigation = useNavigation();
+
     const handleGenerate = () => {
-        console.log("Generate Button Pressed!");
-      };
+        if(!token){
+          navigation.navigate("SignUp")
+        } else{
+          navigation.navigate("Main");
+        }
+    };
 
   return (
     <View style={styles.container}>

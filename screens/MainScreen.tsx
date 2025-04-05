@@ -1,12 +1,13 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import Navbar from '../components/Navbar'
+import Main from '../components/Main'
 
 const MainScreen = () => {
     return (
         <View>
             <Navbar />
-            <Text>Main Screen</Text>
+            <Main />
         </View>
     )
 }
