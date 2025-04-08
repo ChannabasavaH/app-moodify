@@ -10,9 +10,9 @@ import {
   SafeAreaView,
 } from 'react-native';
 import axios from 'axios/index';
-import {useFormik} from 'formik';
+import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 
 const signUpSchema = Yup.object().shape({
@@ -41,12 +41,12 @@ const SignUpScreen = () => {
     onSubmit: async values => {
       setLoading(true);
       try {
-        const res = await axios.post(
+        await axios.post(
           'http://192.168.163.86:8080/api/users/signup',
           values,
           {withCredentials: true},
         );
-        navigation.navigate('Login');
+        navigation.navigate('OTP', { username: values.username });
         Alert.alert('Success', 'Sign-up successful!');
       } catch (error: any) {
         console.error(
