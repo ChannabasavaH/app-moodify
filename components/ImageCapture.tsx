@@ -1,6 +1,21 @@
-import React, { useState } from 'react';
-import { View, Image, TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
-import { launchCamera, launchImageLibrary, ImagePickerResponse, CameraOptions, ImageLibraryOptions } from 'react-native-image-picker';
+import React, {useState} from 'react';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Text,
+  Alert,
+  StyleSheet,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native';
+import {
+  launchCamera,
+  launchImageLibrary,
+  ImagePickerResponse,
+  CameraOptions,
+  ImageLibraryOptions,
+} from 'react-native-image-picker';
 
 interface ImageCaptureProps {
   setImage: (image: any) => void;
@@ -8,18 +23,52 @@ interface ImageCaptureProps {
   imagePreview?: string | null;
 }
 
-const ImageCapture: React.FC<ImageCaptureProps> = ({ setImage, setImagePreview: externalSetImagePreview, imagePreview: externalImagePreview }) => {
-  const [internalImagePreview, setInternalImagePreview] = useState<string | null>(null);
-  
-  const imagePreview = externalImagePreview !== undefined ? externalImagePreview : internalImagePreview;
+const ImageCapture: React.FC<ImageCaptureProps> = ({
+  setImage,
+  setImagePreview: externalSetImagePreview,
+  imagePreview: externalImagePreview,
+}) => {
+  const [internalImagePreview, setInternalImagePreview] = useState<
+    string | null
+  >(null);
+
+  const imagePreview =
+    externalImagePreview !== undefined
+      ? externalImagePreview
+      : internalImagePreview;
   const setImagePreview = externalSetImagePreview || setInternalImagePreview;
+
+  const requestCameraPermission = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs access to your camera to take pictures.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      }
+      return true;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
 
   const handleImageSelection = (response: ImagePickerResponse) => {
     if (response.didCancel) {
       console.log('User cancelled image selection');
     } else if (response.errorCode) {
       console.log('ImagePicker Error: ', response.errorMessage);
-      Alert.alert('Error', response.errorMessage ?? 'Something went wrong with the image picker');
+      Alert.alert(
+        'Error',
+        response.errorMessage ?? 'Something went wrong with the image picker',
+      );
     } else if (response.assets && response.assets.length > 0) {
       const selectedAsset = response.assets[0];
       if (selectedAsset.uri) {
@@ -35,7 +84,7 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ setImage, setImagePreview: 
       quality: 0.8 as any,
       includeBase64: false,
     };
-    
+
     launchImageLibrary(options)
       .then(handleImageSelection)
       .catch(error => {
@@ -44,19 +93,28 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ setImage, setImagePreview: 
       });
   };
 
-  const captureImage = () => {
+  const captureImage = async () => {
+
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert('Permission Denied', 'Camera permission is required to take pictures.');
+      return;
+    }
     const options: CameraOptions = {
       mediaType: 'photo',
       quality: 0.8 as any,
       includeBase64: false,
       saveToPhotos: true,
     };
-    
+
     launchCamera(options)
       .then(handleImageSelection)
       .catch(error => {
         console.error('Camera error:', error);
-        Alert.alert('Error', 'Failed to open camera. Make sure you have granted camera permissions.');
+        Alert.alert(
+          'Error',
+          'Failed to open camera. Make sure you have granted camera permissions.',
+        );
       });
   };
 
@@ -64,26 +122,24 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ setImage, setImagePreview: 
     <View style={styles.container}>
       {imagePreview ? (
         <View style={styles.imageContainer}>
-          <Image source={{ uri: imagePreview }} style={styles.imagePreview} />
+          <Image source={{uri: imagePreview}} style={styles.imagePreview} />
         </View>
       ) : (
         <View style={styles.placeholderContainer}>
           <Text style={styles.placeholderText}>No image selected</Text>
         </View>
       )}
-      
+
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[styles.button, styles.uploadButton]} 
-          onPress={selectImage}
-        >
+        <TouchableOpacity
+          style={[styles.button, styles.uploadButton]}
+          onPress={selectImage}>
           <Text style={styles.buttonText}>Upload Image</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.button, styles.cameraButton]} 
-          onPress={captureImage}
-        >
+
+        <TouchableOpacity
+          style={[styles.button, styles.cameraButton]}
+          onPress={captureImage}>
           <Text style={styles.buttonText}>Use Camera</Text>
         </TouchableOpacity>
       </View>
@@ -98,7 +154,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
