@@ -12,7 +12,6 @@ import {
 import axios from 'axios/index';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import {useNavigation} from '@react-navigation/native';
 import {AuthContext} from '../context/authContext';
 import Navbar from '../components/Navbar';
 
@@ -27,7 +26,6 @@ const loginSchema = Yup.object().shape({
 
 const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
   const {login} = useContext(AuthContext);
 
   const formik = useFormik({
@@ -48,12 +46,12 @@ const LoginScreen = () => {
         const {accessToken, refreshToken} = res.data;
 
         await login(accessToken);
-        navigation.navigate('Main');
+
         Alert.alert('Success', 'Login successful!');
       } catch (error: any) {
         console.error(
           'Error signing up:',
-          error.response?.data || error.message,
+          error.response?.data ?? error.message,
         );
         Alert.alert('Error', 'Failed to sign up. Please try again.');
       }
@@ -88,7 +86,6 @@ const LoginScreen = () => {
               placeholder="Password"
               onChangeText={formik.handleChange('password')}
               value={formik.values.password}
-              //   secureTextEntry
               placeholderTextColor={'#000'}
             />
             {formik.errors.password && (

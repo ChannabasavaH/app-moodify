@@ -1,9 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, {createContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {DeviceEventEmitter} from 'react-native';
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({children}) => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
@@ -14,9 +15,10 @@ export const AuthProvider = ({ children }) => {
     loadToken();
   }, []);
 
-  const login = async (token) => {
+  const login = async token => {
     await AsyncStorage.setItem('accessToken', token);
     setToken(token);
+    DeviceEventEmitter.emit('accessTokenUpdated');
   };
 
   const logout = async () => {
@@ -25,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{token, login, logout}}>
       {children}
     </AuthContext.Provider>
   );

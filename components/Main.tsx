@@ -38,7 +38,7 @@ const Main: React.FC = () => {
       formData.append('image', {
         uri: image.uri,
         type: image.type,
-        name: image.fileName || 'photo.jpg',
+        name: image.fileName ?? 'photo.jpg',
       } as any);
 
       const response = await axios.post<AnalysisResponse>(

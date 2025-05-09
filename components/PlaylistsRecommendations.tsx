@@ -54,6 +54,7 @@ const PlaylistsRecommendations: React.FC<PlaylistsRecommendationsProps> = ({
 
           {selectedPlaylist && (
             <SelectedPlaylist
+              moodTag={analysisResult.dominant}
               playlist={analysisResult.recommendedPlaylists.find((p) => p.id === selectedPlaylist)!}
             />
           )}

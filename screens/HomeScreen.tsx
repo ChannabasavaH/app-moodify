@@ -1,22 +1,27 @@
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
-import React from 'react';
-import Footer from '../components/Footer';
+import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
+import React, {useContext} from 'react';
 import Moodify from '../components/Moodify';
-import Welcome from '../components/Welcome';
-import ReadyToTuneIn from '../components/ReadyToTuneIn';
 import Navbar from '../components/Navbar';
+import {AuthContext} from '../context/authContext';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
+  const {token} = useContext(AuthContext);
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    if (token) {
+      navigation.replace('MainTabs');
+    }
+  }, [token, navigation]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Navbar />
         <ScrollView contentContainerStyle={styles.scrollView}>
           <Moodify />
-          <Welcome />
-          <ReadyToTuneIn />
         </ScrollView>
-        <Footer />
       </View>
     </SafeAreaView>
   );
@@ -28,6 +33,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   scrollView: {
     flexGrow: 1,
