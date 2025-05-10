@@ -38,7 +38,7 @@ const LoginScreen = () => {
       setLoading(true);
       try {
         const res = await axios.post(
-          'http://192.168.163.86:8080/api/users/mobile-login',
+          'http://192.168.214.86:8080/api/users/mobile-login',
           values,
           {withCredentials: true},
         );

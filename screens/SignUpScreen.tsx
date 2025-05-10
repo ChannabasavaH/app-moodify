@@ -42,7 +42,7 @@ const SignUpScreen = () => {
       setLoading(true);
       try {
         await axios.post(
-          'http://192.168.163.86:8080/api/users/signup',
+          'http://192.168.214.86:8080/api/users/signup',
           values,
           {withCredentials: true},
         );
@@ -51,7 +51,7 @@ const SignUpScreen = () => {
       } catch (error: any) {
         console.error(
           'Error signing up:',
-          error.response?.data || error.message,
+          error.response?.data ?? error.message,
         );
         Alert.alert('Error', 'Failed to sign up. Please try again.');
       }

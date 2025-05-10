@@ -27,7 +27,7 @@ const EmailVerificationScreen = ({route}: any) => {
       return;
     }
     try {
-      await axios.post('http://192.168.163.86:8080/api/users/verify', {
+      await axios.post('http://192.168.214.86:8080/api/users/verify', {
         username,
         code: otp,
       });

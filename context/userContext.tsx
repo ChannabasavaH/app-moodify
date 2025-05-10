@@ -43,7 +43,7 @@ type UserContextType = {
   fetchUser: () => Promise<void>;
 };
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({children}: {children: React.ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
@@ -55,13 +55,12 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get('http://192.168.163.86:8080/api/dashboard', {
+      const res = await axios.get('http://192.168.214.86:8080/api/dashboard', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       const userData = res.data.user.user;
-
       if (userData) {
         setUser({
           username: userData.username ?? '',
