@@ -42,7 +42,7 @@ const Main: React.FC = () => {
       } as any);
 
       const response = await axios.post<AnalysisResponse>(
-        'http://192.168.214.86:8080/api/analyze-emotion',
+        'http://192.168.111.86:8080/api/analyze-emotion',
         formData,
         {
           headers: {

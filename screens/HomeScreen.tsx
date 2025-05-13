@@ -1,5 +1,5 @@
 import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import Moodify from '../components/Moodify';
 import Navbar from '../components/Navbar';
 import {AuthContext} from '../context/authContext';
@@ -9,9 +9,9 @@ const HomeScreen = () => {
   const {token} = useContext(AuthContext);
   const navigation = useNavigation();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (token) {
-      navigation.replace('MainTabs');
+      navigation.navigate('MainTabs');
     }
   }, [token, navigation]);
 

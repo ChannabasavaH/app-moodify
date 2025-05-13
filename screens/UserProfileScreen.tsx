@@ -8,16 +8,18 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import {UserContext} from '../context/userContext';
-import { AuthContext } from '../context/authContext';
+import {AuthContext} from '../context/authContext';
 import axios from 'axios';
 import * as Yup from 'yup';
+import Navbar from '../components/Navbar';
 
 const userProfileSchema = Yup.object().shape({
   mobileNo: Yup.string()
-    .length(10, {message: 'Mobile No should be atleast 10 numbers'})
+    .length(10, 'Mobile No should be exactly 10 digits')
     .required('Mobile No is required'),
   location: Yup.string()
     .min(2, 'Location must be at least 2 characters long')
@@ -26,7 +28,7 @@ const userProfileSchema = Yup.object().shape({
 
 const UserProfileScreen = () => {
   const {user}: any = useContext(UserContext);
-  const { token } = useContext(AuthContext)
+  const {token} = useContext(AuthContext);
   const [userData, setUserData] = useState({
     username: user?.username ?? '',
     email: user?.email ?? '',
@@ -55,167 +57,182 @@ const UserProfileScreen = () => {
     setPreviewImage(user?.profilePhoto ?? 'https://github.com/shadcn.png');
   }, [user]);
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = async (field: string, value: string) => {
     setUserData(prev => ({
       ...prev,
       [field]: value,
     }));
-    if (errors[field as keyof typeof errors]) {
+
+    try {
+      await userProfileSchema.validateAt(field, {
+        ...userData,
+        [field]: value,
+      });
       setErrors(prev => ({...prev, [field]: undefined}));
+    } catch (err: any) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: err.message,
+      }));
     }
   };
 
-const handleImageChange = () => {
-  ImagePicker.launchImageLibrary({mediaType: 'photo'}, response => {
-    if (response.didCancel) return;
+  const handleImageChange = () => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.didCancel) return;
 
-    if (response.assets && response.assets.length > 0) {
-      const selectedImage = response.assets[0];
-      if (!selectedImage.uri) return;
-      setPreviewImage(selectedImage.uri);
-      setUserData(prev => ({
-        ...prev,
-        profilePhoto: selectedImage.uri,
-      }));
-      setSelectedFile({
-        uri: selectedImage.uri,
-        name: selectedImage.fileName ?? 'profile.jpg',
-        type: selectedImage.type ?? 'image/jpeg',
-      });
-    }
-  });
-};
-
-
- const handleSubmit = async () => {
-  setIsSubmitting(true);
-  setErrors({});
-
-  try {
-    await userProfileSchema.validate(
-      {
-        mobileNo: userData.mobileNo,
-        location: userData.location,
-      },
-      { abortEarly: false },
-    );
-  } catch (err: any) {
-  const formattedErrors: Record<string, string> = {};
-
-  if (err.inner && Array.isArray(err.inner)) {
-    err.inner.forEach((error: any) => {
-      if (error.path && !formattedErrors[error.path]) {
-        formattedErrors[error.path] = error.message;
+      if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0];
+        if (!selectedImage.uri) return;
+        setPreviewImage(selectedImage.uri);
+        setUserData(prev => ({
+          ...prev,
+          profilePhoto: selectedImage.uri,
+        }));
+        setSelectedFile({
+          uri: selectedImage.uri,
+          name: selectedImage.fileName ?? 'profile.jpg',
+          type: selectedImage.type ?? 'image/jpeg',
+        });
       }
     });
-  } else if (err.path) {
-    formattedErrors[err.path] = err.message;
-  }
+  };
 
-  setErrors(formattedErrors);
-  setIsSubmitting(false);
-  return;
-}
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setErrors({});
 
-  try {
-    const formData = new FormData();
-    formData.append('mobileNo', userData.mobileNo);
-    formData.append('location', userData.location);
+    try {
+      await userProfileSchema.validate(
+        {
+          mobileNo: userData.mobileNo,
+          location: userData.location,
+        },
+        {abortEarly: false},
+      );
+    } catch (err: any) {
+      const formattedErrors: Record<string, string> = {};
 
-    if (selectedFile) {
-      formData.append('profilePhoto', {
-        uri: selectedFile.uri,
-        type: selectedFile.type,
-        name: selectedFile.name,
-      });
+      if (err.inner && Array.isArray(err.inner)) {
+        err.inner.forEach((error: any) => {
+          if (error.path && !formattedErrors[error.path]) {
+            formattedErrors[error.path] = error.message;
+          }
+        });
+      } else if (err.path) {
+        formattedErrors[err.path] = err.message;
+      }
+
+      setErrors(formattedErrors);
+      setIsSubmitting(false);
+      return;
     }
 
-    await axios.put(
-      'http://192.168.214.86:8080/api/users/user-profile',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+    try {
+      const formData = new FormData();
+      formData.append('mobileNo', userData.mobileNo);
+      formData.append('location', userData.location);
+
+      if (selectedFile) {
+        formData.append('profilePhoto', {
+          uri: selectedFile.uri,
+          type: selectedFile.type,
+          name: selectedFile.name,
+        });
+      }
+
+      await axios.put(
+        'http://192.168.111.86:8080/api/users/user-profile',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
         },
-      },
-    );
-    Alert.alert("Profile Updated Successfully");
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    Alert.alert("Error in updating profile");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      );
+      Alert.alert('Profile Updated Successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Error in updating profile');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.center}>
-          <View style={styles.imageWrapper}>
-            {previewImage ? (
-              <Image source={{uri: previewImage}} style={styles.image} />
-            ) : (
-              <View style={styles.placeholderImage} />
+    <SafeAreaView style={styles.safeArea}>
+      <Navbar />
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <View style={styles.center}>
+            <View style={styles.imageWrapper}>
+              {previewImage ? (
+                <Image source={{uri: previewImage}} style={styles.image} />
+              ) : (
+                <View style={styles.placeholderImage} />
+              )}
+              <TouchableOpacity
+                onPress={handleImageChange}
+                style={styles.editIcon}>
+                <Text style={styles.iconText}>✎</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.name}>{userData.username}</Text>
+            <Text style={styles.email}>{userData.email}</Text>
+          </View>
+
+          <View style={styles.form}>
+            <Text style={styles.label}>Mobile Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your mobile number"
+              keyboardType="numeric"
+              maxLength={10}
+              value={userData.mobileNo}
+              onChangeText={text => handleChange('mobileNo', text)}
+            />
+            {errors.mobileNo && (
+              <Text style={styles.error}>{errors.mobileNo}</Text>
             )}
+
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your location"
+              value={userData.location}
+              onChangeText={text => handleChange('location', text)}
+            />
+            {errors.location && (
+              <Text style={styles.error}>{errors.location}</Text>
+            )}
+
             <TouchableOpacity
-              onPress={handleImageChange}
-              style={styles.editIcon}>
-              <Text style={styles.iconText}>✎</Text>
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+              style={[styles.button, isSubmitting && styles.buttonDisabled]}>
+              {isSubmitting ? (
+                <>
+                  <ActivityIndicator color="#fff" />
+                  <Text style={styles.buttonText}> Updating...</Text>
+                </>
+              ) : (
+                <Text style={styles.buttonText}>Update Profile</Text>
+              )}
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>{userData.username}</Text>
-          <Text style={styles.email}>{userData.email}</Text>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.label}>Mobile Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your mobile number"
-            keyboardType="numeric"
-            maxLength={10}
-            value={userData.mobileNo}
-            onChangeText={text => handleChange('mobileNo', text)}
-          />
-          {errors.mobileNo && (
-            <Text style={styles.error}>{errors.mobileNo}</Text>
-          )}
-
-          <Text style={styles.label}>Location</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your location"
-            value={userData.location}
-            onChangeText={text => handleChange('location', text)}
-          />
-          {errors.location && (
-            <Text style={styles.error}>{errors.location}</Text>
-          )}
-
-          <TouchableOpacity
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-            style={[styles.button, isSubmitting && styles.buttonDisabled]}>
-            {isSubmitting ? (
-              <>
-                <ActivityIndicator color="#fff" />
-                <Text style={styles.buttonText}> Updating...</Text>
-              </>
-            ) : (
-              <Text style={styles.buttonText}>Update Profile</Text>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default UserProfileScreen;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F3F4F6',

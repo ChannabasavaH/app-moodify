@@ -14,6 +14,7 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {AuthContext} from '../context/authContext';
 import Navbar from '../components/Navbar';
+import { useNavigation } from '@react-navigation/native';
 
 const loginSchema = Yup.object().shape({
   email: Yup.string()
@@ -27,6 +28,7 @@ const loginSchema = Yup.object().shape({
 const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const {login} = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const formik = useFormik({
     initialValues: {
@@ -38,16 +40,17 @@ const LoginScreen = () => {
       setLoading(true);
       try {
         const res = await axios.post(
-          'http://192.168.214.86:8080/api/users/mobile-login',
+          'http://192.168.111.86:8080/api/users/mobile-login',
           values,
           {withCredentials: true},
         );
 
-        const {accessToken, refreshToken} = res.data;
+        const {accessToken} = res.data;
 
         await login(accessToken);
 
         Alert.alert('Success', 'Login successful!');
+        navigation.navigate("MainTabs")
       } catch (error: any) {
         console.error(
           'Error signing up:',

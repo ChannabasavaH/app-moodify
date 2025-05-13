@@ -5,7 +5,6 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-
 import axios from 'axios';
 import {AuthContext} from './authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,15 +50,29 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
   const [history, setHistory] = useState<History[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const {token} = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const token = authContext?.token;
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get('http://192.168.214.86:8080/api/dashboard', {
+      // Check if token exists and is valid before making request
+      const currentToken = await AsyncStorage.getItem('accessToken');
+      
+      if (!currentToken) {
+        console.log('No token available');
+        setLoading(false);
+        return;
+      }
+
+      // Format the token properly for the Authorization header
+      const authToken = currentToken.trim();
+      
+      const res = await axios.get('http://192.168.111.86:8080/api/dashboard', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
+
       const userData = res.data.user.user;
       if (userData) {
         setUser({
@@ -75,10 +88,12 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         setHistory(res.data?.moodHistory?.moodHistory ?? []);
       }
     } catch (err) {
-      if (err instanceof Error) {
-        console.log('Error updating favorites:', err.message);
+      if (axios.isAxiosError(err)) {
+        console.log('API Error:', err.response?.data || err.message);
+      } else if (err instanceof Error) {
+        console.log('Error fetching user data:', err.message);
       } else {
-        console.log('Unknown error updating favorites:', JSON.stringify(err));
+        console.log('Unknown error fetching user data:', JSON.stringify(err));
       }
       setUser(null);
       setFavorites([]);
@@ -88,32 +103,58 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
+  // Only fetch user data when token is available and valid
   useEffect(() => {
     if (!token) {
       setLoading(false);
       return;
     }
 
+    const loadUserData = async () => {
+      try {
+        // Validate token exists in AsyncStorage before making request
+        const storedToken = await AsyncStorage.getItem('accessToken');
+        if (!storedToken) {
+          console.log('No token in AsyncStorage');
+          setLoading(false);
+          return;
+        }
+        
+        fetchUser();
+      } catch (error) {
+        console.log('Error in loadUserData:', error);
+        setLoading(false);
+      }
+    };
+
+    // Use a timeout to ensure any token refreshes complete
     const timeout = setTimeout(() => {
-      fetchUser();
-    }, 300);
+      loadUserData();
+    }, 500);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [token]);
 
   // Listen for token updates from setAccessToken
   useEffect(() => {
     const handleTokenUpdate = async () => {
-      const token = await AsyncStorage.getItem('accessToken');
-      if (token) {
-        // Set loading to true when we're fetching new data
-        setLoading(true);
-        fetchUser();
-      } else {
-        // Clear user data if token is removed
-        setUser(null);
-        setFavorites([]);
-        setHistory([]);
+      try {
+        const newToken = await AsyncStorage.getItem('accessToken');
+        
+        if (newToken) {
+          // Set loading to true when we're fetching new data
+          setLoading(true);
+          // Give a little time for the token to be properly saved
+          setTimeout(() => fetchUser(), 300);
+        } else {
+          // Clear user data if token is removed
+          setUser(null);
+          setFavorites([]);
+          setHistory([]);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log('Error handling token update:', error);
         setLoading(false);
       }
     };

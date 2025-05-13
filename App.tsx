@@ -14,6 +14,8 @@ import UserProfileScreen from './screens/UserProfileScreen';
 import FavoritesScreen from './screens/FavoritesScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import {UserProvider} from './context/userContext';
+import FavoriteDetailScreen from './screens/FavoriteDetailScreen';
+import HistoryDetailScreen from './screens/HistoryDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -62,6 +64,8 @@ const App = () => {
               component={MainTabs}
               options={{headerShown: false}}
             />
+            <Stack.Screen name="FavoriteDetailScreen" component={FavoriteDetailScreen} />
+            <Stack.Screen name="HistoryDetailScreen" component={HistoryDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserProvider>

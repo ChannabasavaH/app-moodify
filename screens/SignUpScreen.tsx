@@ -42,7 +42,7 @@ const SignUpScreen = () => {
       setLoading(true);
       try {
         await axios.post(
-          'http://192.168.214.86:8080/api/users/signup',
+          'http://192.168.111.86:8080/api/users/signup',
           values,
           {withCredentials: true},
         );
