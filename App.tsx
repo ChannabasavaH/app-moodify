@@ -16,6 +16,7 @@ import HistoryScreen from './screens/HistoryScreen';
 import {UserProvider} from './context/userContext';
 import FavoriteDetailScreen from './screens/FavoriteDetailScreen';
 import HistoryDetailScreen from './screens/HistoryDetailScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -66,6 +67,7 @@ const App = () => {
             />
             <Stack.Screen name="FavoriteDetailScreen" component={FavoriteDetailScreen} />
             <Stack.Screen name="HistoryDetailScreen" component={HistoryDetailScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserProvider>

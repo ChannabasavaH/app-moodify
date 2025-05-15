@@ -26,7 +26,7 @@ const loginSchema = Yup.object().shape({
     .required('Password is required'),
 });
 
-const LoginScreen = () => {
+const ForgotPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const {login} = useContext(AuthContext);
@@ -42,7 +42,7 @@ const LoginScreen = () => {
       setLoading(true);
       try {
         const res = await axios.post(
-          'http://192.168.28.86:8080/api/users/mobile-login',
+          'http:// 192.168.28.86:8080/api/users/forgot-password',
           values,
           {withCredentials: true},
         );
@@ -72,7 +72,7 @@ const LoginScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <Navbar />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Login</Text>
+        <Text style={styles.title}>Forgot Password</Text>
         <View style={styles.container}>
           <View style={styles.box}>
             <Text style={styles.text}>Email</Text>
@@ -120,12 +120,6 @@ const LoginScreen = () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('ForgotPassword');
-            }}>
-            <Text style={styles.passwordText}>Forgot Password</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -211,4 +205,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default ForgotPasswordScreen;

@@ -10,10 +10,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 import axios from 'axios/index';
-import { useFormik } from 'formik';
+import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Navbar from '../components/Navbar';
+import Icon from '@react-native-vector-icons/fontawesome';
 
 const signUpSchema = Yup.object().shape({
   username: Yup.string()
@@ -29,6 +30,7 @@ const signUpSchema = Yup.object().shape({
 
 const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
   const formik = useFormik({
@@ -46,7 +48,7 @@ const SignUpScreen = () => {
           values,
           {withCredentials: true},
         );
-        navigation.navigate('OTP', { username: values.username });
+        navigation.navigate('OTP', {username: values.username});
         Alert.alert('Success', 'Sign-up successful!');
       } catch (error: any) {
         console.error(
@@ -59,10 +61,14 @@ const SignUpScreen = () => {
     },
   });
 
+  const handleShowPassword = () => {
+    setShowPassword(prev => !prev);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Navbar />
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <Text style={styles.title}>Sign Up</Text>
 
@@ -93,14 +99,23 @@ const SignUpScreen = () => {
             )}
 
             <Text style={styles.text}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              onChangeText={formik.handleChange('password')}
-              value={formik.values.password}
-              //   secureTextEntry
-              placeholderTextColor={'#000'}
-            />
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                onChangeText={formik.handleChange('password')}
+                value={formik.values.password}
+                placeholderTextColor="#000"
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity onPress={handleShowPassword}>
+                <Icon
+                  name={showPassword ? 'eye' : 'eye-slash'}
+                  color="black"
+                  size={20}
+                />
+              </TouchableOpacity>
+            </View>
             {formik.errors.password && (
               <Text style={styles.errorText}>{formik.errors.password}</Text>
             )}
@@ -122,24 +137,23 @@ const SignUpScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    height: '100%',
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 16,
     width: '100%',
-    height: '100%',
+    alignItems: 'center',
   },
   box: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 16,
     width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   text: {
     fontSize: 20,
@@ -159,6 +173,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
     backgroundColor: 'white',
+  },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
+    width: '80%',
+    paddingHorizontal: 10,
+    backgroundColor: 'white',
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingRight: 10,
+    color: 'black',
   },
   button: {
     backgroundColor: 'black',
